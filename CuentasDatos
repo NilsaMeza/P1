@@ -1,0 +1,93 @@
+﻿using System;
+using System.Data;
+using Npgsql;
+using Infraestructura.Conexiones;
+using Infraestructura.Modelos;
+
+namespace Infraestructura.Datos
+{
+    public class CuentasDatos
+    {
+        private ConexionDB conexion;
+
+        public CuentasDatos(string cadenaConexion)
+        {
+            conexion = new ConexionDB(cadenaConexion);
+        }
+
+        public void InsertarCuenta(CuentasModel cuenta)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand("INSERT INTO Cuentas(idCliente, NroCuenta, FechaAlta, TipoCuenta, Estado, Saldo, NroContrato, CostoMantenimiento, PromedioAcreditacion, Moneda, EstadoCuenta)" +
+                                            "VALUES(@idCliente, @NroCuenta, @FechaAlta, @TipoCuenta, @Estado, @Saldo, @NroContrato, @CostoMantenimiento, @PromedioAcreditacion, @Moneda, @EstadoCuenta)", conn);
+            comando.Parameters.AddWithValue("idCliente", cuenta.idCliente);
+            comando.Parameters.AddWithValue("NroCuenta", cuenta.NroCuenta);
+            comando.Parameters.AddWithValue("FechaAlta", cuenta.FechaAlta);
+            comando.Parameters.AddWithValue("TipoCuenta", cuenta.TipoCuenta);
+            comando.Parameters.AddWithValue("Estado", cuenta.Estado);
+            comando.Parameters.AddWithValue("Saldo", cuenta.Saldo);
+            comando.Parameters.AddWithValue("NroContrato", cuenta.NroContrato);
+            comando.Parameters.AddWithValue("CostoMantenimiento", cuenta.CostoMantenimiento);
+            comando.Parameters.AddWithValue("PromedioAcreditacion", cuenta.PromedioAcreditacion);
+            comando.Parameters.AddWithValue("Moneda", cuenta.Moneda);
+            comando.Parameters.AddWithValue("EstadoCuenta", cuenta.EstadoCuenta);
+
+            comando.ExecuteNonQuery();
+        }
+
+        public CuentasModel? ObtenerCuentaPorId(int id)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"SELECT * FROM Cuentas WHERE Id = {id}", conn);
+            using var reader = comando.ExecuteReader();
+            if (reader.Read())
+            {
+                return new CuentasModel
+                {
+                    Id = reader.GetInt32("Id"),
+                    idCliente = reader.GetInt32("idCliente"),
+                    NroCuenta = reader.GetString("NroCuenta"),
+                    FechaAlta = reader.GetDateTime("FechaAlta"),
+                    TipoCuenta = reader.GetString("TipoCuenta"),
+                    Estado = reader.GetString("Estado"),
+                    Saldo = reader.GetDecimal("Saldo"),
+                    NroContrato = reader.GetString("NroContrato"),
+                    CostoMantenimiento = reader.GetDecimal("CostoMantenimiento"),
+                    PromedioAcreditacion = reader.GetString("PromedioAcreditacion"),
+                    Moneda = reader.GetString("Moneda"),
+                    EstadoCuenta = reader.GetString("EstadoCuenta")
+                };
+            }
+            return null;
+        }
+
+        public void ModificarCuenta(CuentasModel cuenta)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"UPDATE Cuentas SET idCliente = {cuenta.idCliente}, " +
+                                            $"NroCuenta = @NroCuenta, " +
+                                            $"FechaAlta = @FechaAlta, " +
+                                            $"TipoCuenta = @TipoCuenta, " +
+                                            $"Estado = @Estado, " +
+                                            $"Saldo = @Saldo, " +
+                                            $"NroContrato = @NroContrato, " +
+                                            $"CostoMantenimiento = @CostoMantenimiento, " +
+                                            $"PromedioAcreditacion = @PromedioAcreditacion, " +
+                                            $"Moneda = @Moneda, " +
+                                            $"EstadoCuenta = @EstadoCuenta " +
+                                            $"WHERE Id = {cuenta.Id}", conn);
+            comando.Parameters.AddWithValue("NroCuenta", cuenta.NroCuenta);
+            comando.Parameters.AddWithValue("FechaAlta", cuenta.FechaAlta);
+            comando.Parameters.AddWithValue("TipoCuenta", cuenta.TipoCuenta);
+            comando.Parameters.AddWithValue("Estado", cuenta.Estado);
+            comando.Parameters.AddWithValue("Saldo", cuenta.Saldo);
+            comando.Parameters.AddWithValue("NroContrato", cuenta.NroContrato);
+            comando.Parameters.AddWithValue("CostoMantenimiento", cuenta.CostoMantenimiento);
+            comando.Parameters.AddWithValue("PromedioAcreditacion", cuenta.PromedioAcreditacion);
+            comando.Parameters.AddWithValue("Moneda", cuenta.Moneda);
+            comando.Parameters.AddWithValue("EstadoCuenta", cuenta.EstadoCuenta);
+
+            comando.ExecuteNonQuery();
+        }
+    }
+}
