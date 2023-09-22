@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "xfomj2Gq0tEe2TEMpjQNgGljc9pbJxNFBg5BfrZuZsNC7q3PZrfwIcJ3whQGt1GHhmRV9w1bUk3jc3i9ED7ang==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\User\\Desktop\\OptativoTresNet-main\\Infraestructura\\Infraestructura.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\npgsql\\7.0.6\\npgsql.7.0.6.nupkg.sha512"
+  ],
+  "logs": []
+}
