@@ -1,0 +1,77 @@
+﻿using System;
+using System.Data;
+using Npgsql;
+using Infraestructura.Conexiones;
+using Infraestructura.Modelos;
+
+namespace Infraestructura.Datos
+{
+    public class PersonaDatos
+    {
+        private ConexionDB conexion;
+
+        public PersonaDatos(string cadenaConexion)
+        {
+            conexion = new ConexionDB(cadenaConexion);
+        }
+
+        public void InsertarPersona(Persona persona)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand("INSERT INTO Persona(IdCiudad, Nombre, Apellido, TipoDocumento, NroDocumento, Direccion, Celular, Email, Estado)" +
+                                            "VALUES(@IdCiudad, @Nombre, @Apellido, @TipoDocumento, @NroDocumento, @Direccion, @Celular, @Email, @Estado)", conn);
+            comando.Parameters.AddWithValue("IdCiudad", persona.IdCiudad);
+            comando.Parameters.AddWithValue("Nombre", persona.Nombre);
+            comando.Parameters.AddWithValue("Apellido", persona.Apellido);
+            comando.Parameters.AddWithValue("TipoDocumento", persona.TipoDocumento);
+            comando.Parameters.AddWithValue("NroDocumento", persona.NroDocumento);
+            comando.Parameters.AddWithValue("Direccion", persona.Direccion);
+            comando.Parameters.AddWithValue("Celular", persona.Celular);
+            comando.Parameters.AddWithValue("Email", persona.Email);
+            comando.Parameters.AddWithValue("Estado", persona.Estado);
+
+            comando.ExecuteNonQuery();
+        }
+
+        public Persona ObtenerPersonaPorId(int id)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"SELECT * FROM Persona WHERE id = {id}", conn);
+            using var reader = comando.ExecuteReader();
+            if (reader.Read())
+            {
+                return new Persona
+                {
+                    Id = reader.GetInt32("id"),
+                    IdCiudad = reader.GetInt32("IdCiudad"),
+                    Nombre = reader.GetString("Nombre"),
+                    Apellido = reader.GetString("Apellido"),
+                    TipoDocumento = reader.GetString("TipoDocumento"),
+                    NroDocumento = reader.GetString("NroDocumento"),
+                    Direccion = reader.GetString("Direccion"),
+                    Celular = reader.GetString("Celular"),
+                    Email = reader.GetString("Email"),
+                    Estado = reader.GetString("Estado")
+                };
+            }
+            return null;
+        }
+
+        public void ModificarPersona(Persona persona)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"UPDATE Persona SET IdCiudad = {persona.IdCiudad}, " +
+                                                  $"Nombre = '{persona.Nombre}', " +
+                                                  $"Apellido = '{persona.Apellido}', " +
+                                                  $"TipoDocumento = '{persona.TipoDocumento}', " +
+                                                  $"NroDocumento = '{persona.NroDocumento}', " +
+                                                  $"Direccion = '{persona.Direccion}', " +
+                                                  $"Celular = '{persona.Celular}', " +
+                                                  $"Email = '{persona.Email}', " +
+                                                  $"Estado = '{persona.Estado}' " +
+                                            $"WHERE id = {persona.Id}", conn);
+
+            comando.ExecuteNonQuery();
+        }
+    }
+}
