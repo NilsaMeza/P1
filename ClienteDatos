@@ -1,0 +1,65 @@
+﻿using System;
+using System.Data;
+using Npgsql;
+using Infraestructura.Conexiones;
+using Infraestructura.Modelos;
+
+namespace Infraestructura.Datos
+{
+    public class ClienteDatos
+    {
+        private ConexionDB conexion;
+
+        public ClienteDatos(string cadenaConexion)
+        {
+            conexion = new ConexionDB(cadenaConexion);
+        }
+
+        public void InsertarCliente(ClienteModel cliente)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand("INSERT INTO Cliente(IdPersona, FechaIngreso, Calificacion, Estado)" +
+                                            "VALUES(@IdPersona, @FechaIngreso, @Calificacion, @Estado)", conn);
+            comando.Parameters.AddWithValue("IdPersona", cliente.IdPersona);
+            comando.Parameters.AddWithValue("FechaIngreso", cliente.FechaIngreso);
+            comando.Parameters.AddWithValue("Calificacion", cliente.Calificacion);
+            comando.Parameters.AddWithValue("Estado", cliente.Estado);
+
+            comando.ExecuteNonQuery();
+        }
+
+        public ClienteModel? ObtenerClientePorId(int id)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"SELECT * FROM Cliente WHERE IdCliente = {id}", conn);
+            using var reader = comando.ExecuteReader();
+            if (reader.Read())
+            {
+                return new ClienteModel
+                {
+                    IdCliente = reader.GetInt32("IdCliente"),
+                    IdPersona = reader.GetInt32("IdPersona"),
+                    FechaIngreso = reader.GetDateTime("FechaIngreso"),
+                    Calificacion = reader.GetString("Calificacion"),
+                    Estado = reader.GetString("Estado")
+                };
+            }
+            return null;
+        }
+
+        public void ModificarCliente(ClienteModel cliente)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"UPDATE Cliente SET IdPersona = {cliente.IdPersona}, " +
+                                            $"FechaIngreso = @FechaIngreso, " +
+                                            $"Calificacion = @Calificacion, " +
+                                            $"Estado = @Estado " +
+                                            $"WHERE IdCliente = {cliente.IdCliente}", conn);
+            comando.Parameters.AddWithValue("FechaIngreso", cliente.FechaIngreso);
+            comando.Parameters.AddWithValue("Calificacion", cliente.Calificacion);
+            comando.Parameters.AddWithValue("Estado", cliente.Estado);
+
+            comando.ExecuteNonQuery();
+        }
+    }
+}
