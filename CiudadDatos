@@ -1,0 +1,59 @@
+﻿using System;
+using System.Data;
+using Infraestructura.Conexiones;
+using Infraestructura.Modelos;
+
+namespace Infraestructura.Datos
+{
+	public class CiudadDatos
+	{
+		private ConexionDB conexion;
+
+		public CiudadDatos(string cadenaConexion)
+		{
+           conexion = new ConexionDB(cadenaConexion);
+        }
+
+		public void insertarCiudad(CiudadModel ciudad)
+		{
+			var conn = conexion.GetConexion();
+			var comando = new Npgsql.NpgsqlCommand("INSERT INTO ciudad(idCiu, Ciudad, Departamento, Postal_code)" +
+                                                "VALUES(@idCiu, @Ciudad, @Departamento, @Postal_code)", conn);
+			comando.Parameters.AddWithValue("descripcion", ciudad.idCiu);
+			comando.Parameters.AddWithValue("nombre_corto", ciudad.Ciudad);
+			comando.Parameters.AddWithValue("estado", ciudad.Departamento);
+			comando.Parameters.AddWithValue("idCiudad", ciudad.Postal_code);
+
+			comando.ExecuteNonQuery();
+		}
+
+		public CiudadModel? obtenerCiudadPorId(int id)
+		{
+			var conn = conexion.GetConexion();
+			var comando = new Npgsql.NpgsqlCommand($"Select * from ciudad where idCiu = {id}", conn);
+			using var reader = comando.ExecuteReader();
+			if (reader.Read())
+			{
+				return new CiudadModel
+				{
+					idCiu = reader.GetInt32("idCiu"),
+                    Ciudad = reader.GetString("Ciudad"),
+					Departamento = reader.GetString("Departamento"),
+                    Postal_code = reader.GetString("Postal_code")
+				};
+			}
+			return null;
+		}
+
+		public void modificarCiudad(CiudadModel ciudad)
+		{
+            var conn = conexion.GetConexion();
+            var comando = new Npgsql.NpgsqlCommand($"UPDATE ciudad SET Ciudad = '{ciudad.Ciudad}', " +
+                                                          $"Departamento = '{ciudad.Departamento}', " +
+                                                          $"Postal_code = '{ciudad.Postal_code}' " +
+                                                $" WHERE idCiu = {ciudad.idCiu}", conn);
+
+            comando.ExecuteNonQuery();
+        }
+	}
+}
