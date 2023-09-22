@@ -1,0 +1,85 @@
+﻿using System;
+using System.Data;
+using Npgsql;
+using Infraestructura.Conexiones;
+using Infraestructura.Modelos;
+
+namespace Infraestructura.Datos
+{
+    public class MovimientosDatos
+    {
+        private ConexionDB conexion;
+
+        public MovimientosDatos(string cadenaConexion)
+        {
+            conexion = new ConexionDB(cadenaConexion);
+        }
+
+        public void InsertarMovimiento(Movimientos movimiento)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand("INSERT INTO Movimientos(IdCuenta, FechaMovimiento, TipoMovimiento, SaldoAnterior, SaldoActual, MontoMovimiento, CuentaOrigen, CuentaDestino, Canal)" +
+                                            "VALUES(@IdCuenta, @FechaMovimiento, @TipoMovimiento, @SaldoAnterior, @SaldoActual, @MontoMovimiento, @CuentaOrigen, @CuentaDestino, @Canal)", conn);
+            comando.Parameters.AddWithValue("IdCuenta", movimiento.IdCuenta);
+            comando.Parameters.AddWithValue("FechaMovimiento", movimiento.FechaMovimiento);
+            comando.Parameters.AddWithValue("TipoMovimiento", movimiento.TipoMovimiento);
+            comando.Parameters.AddWithValue("SaldoAnterior", movimiento.SaldoAnterior);
+            comando.Parameters.AddWithValue("SaldoActual", movimiento.SaldoActual);
+            comando.Parameters.AddWithValue("MontoMovimiento", movimiento.MontoMovimiento);
+            comando.Parameters.AddWithValue("CuentaOrigen", movimiento.CuentaOrigen);
+            comando.Parameters.AddWithValue("CuentaDestino", movimiento.CuentaDestino);
+            comando.Parameters.AddWithValue("Canal", movimiento.Canal);
+
+            comando.ExecuteNonQuery();
+        }
+
+        public Movimientos ObtenerMovimientoPorId(int id)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"SELECT * FROM Movimientos WHERE IdMovimiento = {id}", conn);
+            using var reader = comando.ExecuteReader();
+            if (reader.Read())
+            {
+                return new Movimientos
+                {
+                    IdMovimiento = reader.GetInt32("IdMovimiento"),
+                    IdCuenta = reader.GetInt32("IdCuenta"),
+                    FechaMovimiento = reader.GetDateTime("FechaMovimiento"),
+                    TipoMovimiento = reader.GetString("TipoMovimiento"),
+                    SaldoAnterior = reader.GetDecimal("SaldoAnterior"),
+                    SaldoActual = reader.GetDecimal("SaldoActual"),
+                    MontoMovimiento = reader.GetDecimal("MontoMovimiento"),
+                    CuentaOrigen = reader.GetDecimal("CuentaOrigen"),
+                    CuentaDestino = reader.GetDecimal("CuentaDestino"),
+                    Canal = reader.GetDecimal("Canal")
+                };
+            }
+            return null;
+        }
+
+        public void ModificarMovimiento(Movimientos movimiento)
+        {
+            var conn = conexion.GetConexion();
+            var comando = new NpgsqlCommand($"UPDATE Movimientos SET IdCuenta = {movimiento.IdCuenta}, " +
+                                            $"FechaMovimiento = @FechaMovimiento, " +
+                                            $"TipoMovimiento = @TipoMovimiento, " +
+                                            $"SaldoAnterior = @SaldoAnterior, " +
+                                            $"SaldoActual = @SaldoActual, " +
+                                            $"MontoMovimiento = @MontoMovimiento, " +
+                                            $"CuentaOrigen = @CuentaOrigen, " +
+                                            $"CuentaDestino = @CuentaDestino, " +
+                                            $"Canal = @Canal " +
+                                            $"WHERE IdMovimiento = {movimiento.IdMovimiento}", conn);
+            comando.Parameters.AddWithValue("FechaMovimiento", movimiento.FechaMovimiento);
+            comando.Parameters.AddWithValue("TipoMovimiento", movimiento.TipoMovimiento);
+            comando.Parameters.AddWithValue("SaldoAnterior", movimiento.SaldoAnterior);
+            comando.Parameters.AddWithValue("SaldoActual", movimiento.SaldoActual);
+            comando.Parameters.AddWithValue("MontoMovimiento", movimiento.MontoMovimiento);
+            comando.Parameters.AddWithValue("CuentaOrigen", movimiento.CuentaOrigen);
+            comando.Parameters.AddWithValue("CuentaDestino", movimiento.CuentaDestino);
+            comando.Parameters.AddWithValue("Canal", movimiento.Canal);
+
+            comando.ExecuteNonQuery();
+        }
+    }
+}
